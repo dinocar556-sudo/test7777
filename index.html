@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>열 흡수 vs 열 방출 스피드 퀴즈</title>
+    <!-- 귀여운 폰트 (Jua) 불러오기 -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <style>
+        /* 기본 리셋 및 폰트 설정 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: #fff0f5; /* 귀여운 파스텔 핑크 배경 */
+            /* 도트 무늬 배경 추가 */
+            background-image: radial-gradient(#ffb6c1 15%, transparent 16%), radial-gradient(#ffb6c1 15%, transparent 16%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        /* 중앙 카드 영역 */
+        .card {
+            background-color: #ffffff;
+            width: 90%;
+            max-width: 420px;
+            padding: 40px 25px;
+            border-radius: 30px;
+            border: 4px dashed #ffb6c1; /* 핑크색 점선 테두리 */
+            box-shadow: 0 8px 20px rgba(255, 182, 193, 0.4);
+            text-align: center;
+        }
+
+        /* 퀴즈 제목 */
+        .card h1 {
+            font-size: 1.8rem;
+            color: #ff6b81;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px dotted #ffeaa7;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* 문제 텍스트 */
+        #question-text {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: #57606f;
+            word-break: keep-all;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1f2f6;
+            border-radius: 20px;
+            padding: 15px;
+        }
+
+        /* 피드백 텍스트 */
+        #feedback-text {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            min-height: 30px;
+        }
+        /* 정답/오답 애니메이션 효과 */
+        .correct { color: #2ed573; animation: pop 0.3s ease; } 
+        .incorrect { color: #ff4757; animation: shake 0.3s ease; } 
+
+        /* 버튼 컨테이너 */
+        .button-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        /* 공통 버튼 디자인 (입체 젤리 스타일) */
+        .btn {
+            flex: 1;
+            border: none;
+            padding: 15px;
+            font-size: 1.3rem;
+            font-family: 'Jua', sans-serif;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.1s;
+            color: white;
+        }
+        
+        /* 열 흡수 버튼 - 민트색 */
+        #btn-absorb {
+            background-color: #7bed9f;
+            box-shadow: 0 6px 0 #2ed573;
+        }
+        #btn-absorb:active {
+            box-shadow: 0 2px 0 #2ed573;
+            transform: translateY(4px);
+        }
+        
+        /* 열 방출 버튼 - 하늘색 */
+        #btn-emit {
+            background-color: #70a1ff;
+            box-shadow: 0 6px 0 #1e90ff;
+        }
+        #btn-emit:active {
+            box-shadow: 0 2px 0 #1e90ff;
+            transform: translateY(4px);
+        }
+        
+        /* 비활성화 시 스타일 */
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none !important;
+            transform: translateY(4px);
+        }
+
+        /* 결과 화면 영역 */
+        #result-area {
+            display: none;
+        }
+        #score-text {
+            font-size: 1.6rem;
+            margin-bottom: 25px;
+            color: #ff6b81;
+        }
+
+        /* 다시하기 버튼 */
+        #btn-restart {
+            background-color: #ffa502;
+            box-shadow: 0 6px 0 #ff7f50;
+            width: 100%;
+        }
+        #btn-restart:active {
+            box-shadow: 0 2px 0 #ff7f50;
+            transform: translateY(4px);
+        }
+
+        /* 통통 튀는 애니메이션 및 흔들림 애니메이션 */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>열 흡수 vs 열 방출 스피드 퀴즈</h1>
+        
+        <!-- 퀴즈 진행 영역 -->
+        <div id="game-area">
+            <p id="question-text">문제 불러오는 중...</p>
+            <p id="feedback-text"></p>
+            <div class="button-group">
+                <!-- 이모지 추가 -->
+                <button class="btn" onclick="checkAnswer('열 흡수')" id="btn-absorb">🔥 열 흡수</button>
+                <button class="btn" onclick="checkAnswer('열 방출')" id="btn-emit">❄️ 열 방출</button>
+            </div>
+        </div>
+
+        <!-- 퀴즈 결과 영역 -->
+        <div id="result-area">
+            <p id="score-text"></p>
+            <button class="btn" onclick="initQuiz()" id="btn-restart">🔄 다시 하기</button>
+        </div>
+    </div>
+
+    <script>
+        // 문제 및 정답 데이터
+        const quizData = [
+            { question: "얼음이 녹아 물이 된다", answer: "열 흡수" },
+            { question: "물이 얼어 얼음이 된다", answer: "열 방출" },
+            { question: "젖은 빨래가 마른다", answer: "열 흡수" },
+            { question: "겨울철 유리창에 김이 서린다", answer: "열 방출" },
+            { question: "에어컨 바람으로 땀이 마른다", answer: "열 흡수" }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let isWaiting = false; // 버튼 중복 클릭 방지용
+
+        // DOM 요소 가져오기
+        const gameArea = document.getElementById("game-area");
+        const resultArea = document.getElementById("result-area");
+        const questionText = document.getElementById("question-text");
+        const feedbackText = document.getElementById("feedback-text");
+        const scoreText = document.getElementById("score-text");
+        const btnAbsorb = document.getElementById("btn-absorb");
+        const btnEmit = document.getElementById("btn-emit");
+
+        // 퀴즈 초기화 함수
+        function initQuiz() {
+            currentIndex = 0;
+            score = 0;
+            isWaiting = false;
+            
+            gameArea.style.display = "block";
+            resultArea.style.display = "none";
+            feedbackText.textContent = "";
+            feedbackText.className = "";
+            
+            loadQuestion();
+        }
+
+        // 문제 불러오기 함수
+        function loadQuestion() {
+            // 버튼 활성화
+            btnAbsorb.disabled = false;
+            btnEmit.disabled = false;
+            
+            // 문제 출력
+            questionText.textContent = `${currentIndex + 1}. ${quizData[currentIndex].question}`;
+            feedbackText.textContent = ""; // 새 문제가 나오면 이전 피드백 텍스트 지우기
+        }
+
+        // 정답 확인 함수
+        function checkAnswer(selectedOption) {
+            if (isWaiting) return; // 대기 중일 때는 클릭 무시
+            isWaiting = true;
+            
+            // 버튼 비활성화 (피드백을 보는 동안 다른 버튼 클릭 방지)
+            btnAbsorb.disabled = true;
+            btnEmit.disabled = true;
+
+            const correctAnswer = quizData[currentIndex].answer;
+
+            // 정답 여부 판단 및 피드백 표시 (이모지와 귀여운 텍스트)
+            if (selectedOption === correctAnswer) {
+                feedbackText.textContent = "🎉 딩동댕! 정답이에요! 🎉";
+                feedbackText.className = "correct";
+                score++;
+            } else {
+                feedbackText.textContent = "💦 땡! 아쉬워요! 💦";
+                feedbackText.className = "incorrect";
+            }
+
+            // 피드백을 보여준 뒤 0.8초 후 다음 문제로 넘어가기
+            setTimeout(() => {
+                currentIndex++;
+                
+                if (currentIndex < quizData.length) {
+                    loadQuestion();
+                    isWaiting = false;
+                } else {
+                    showResult();
+                }
+            }, 800); // 800ms(0.8초) 지연
+        }
+
+        // 결과 화면 표시 함수
+        function showResult() {
+            gameArea.style.display = "none";
+            resultArea.style.display = "block";
+            scoreText.textContent = `🌟 ${quizData.length}문제 중 ${score}개 맞혔어요! 🌟`;
+        }
+
+        // 페이지 로드 시 퀴즈 시작
+        window.onload = initQuiz;
+    </script>
+
+</body>
+</html>
